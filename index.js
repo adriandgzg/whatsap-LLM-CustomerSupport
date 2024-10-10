@@ -6,9 +6,6 @@ require('dotenv').config(); // Para conectarte a la API de OpenAI
 const app = express();
 const port = process.env.PORT || 3000;
 
-
-//Configuracion ChatGPT
-const openaiApiKey = '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';
 // Configura Twilio
 const accountSid = 'ACccc2ac54028e77d443ce33545407651c';
 const authToken = '05c0661af1f3b8e46bf4fea31ddc3013';
@@ -73,68 +70,36 @@ app.post('/ask', async (req, res) => {
     }
 
     console.log(`Mensaje enviado a OpenAI: ${userMessage}`);
-/*
-    // Enviar el mensaje a OpenAI
+
+    const API_KEY = process.env.OPENAI_API_KEY;  // Asegúrate de que esta variable de entorno esté configurada
+    console.log(API_KEY);  // Verifica que la clave API no sea undefined
+
+    const endpoint = 'https://api.openai.com/v1/chat/completions';
     try {
-        const responseFromChatGPT = await axios.post('https://api.openai.com/v1/completions', {
-            model: 'text-davinci-003',
-            prompt: userMessage,
-            max_tokens: 150
+        const response = await axios.post(endpoint, {
+            model: "gpt-4",  // Asegúrate de usar el modelo correcto
+            messages: [
+                { role: "system", content: "You are a helpful assistant." }, // Este mensaje no estaba en tu código
+                { role: "user", content: userMessage }
+            ],
+            max_tokens: 100,  // Limitar la respuesta a 100 tokens
         }, {
             headers: {
-                'Authorization': `Bearer ${openaiApiKey}`,
+                'Authorization': `Bearer ${API_KEY}`,
                 'Content-Type': 'application/json'
             }
         });
 
-        // Extraer la respuesta de OpenAI
-        const reply = responseFromChatGPT.data.choices[0].text.trim();
-
+        // Imprimir la respuesta de ChatGPT
+        const reply = response.data.choices[0].message.content.trim();  // Usa la respuesta correcta
         console.log(`Respuesta de OpenAI: ${reply}`);
-
+        
         // Enviar la respuesta de OpenAI al cliente
         return res.status(200).send({ reply });
-
-*/
-        const API_KEY = process.env.OPENAI_API_KEY;
-        console.log(API_KEY);
-        // Crear una función para enviar mensajes a la API de ChatGPT
-            const endpoint = 'https://api.openai.com/v1/chat/completions';
-            try {
-                const response = await axios.post(endpoint, {
-                    model: "gpt-4",  // Usar el modelo GPT-4 o GPT-3.5
-                    messages: [{ role: "user", content: userMessage }],
-                    max_tokens: 100,  // Limitar la respuesta a 100 tokens
-                }, {
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                // Imprimir la respuesta de ChatGPT
-                console.log("Respuesta de ChatGPT:", response.data.choices[0].message.content);
-                const reply = responseFromChatGPT.data.choices[0].text.trim();
-
-                console.log(`Respuesta de OpenAI: ${reply}`);
-        
-                // Enviar la respuesta de OpenAI al cliente
-                return res.status(200).send({ reply });
-            } catch (error) {
-                console.error("Error al conectarse a la API de OpenAI:", error.message);
-                console.error('Error al comunicar con OpenAI:', error);
-                return res.status(500).send({ error: 'Error al obtener respuesta de OpenAI' });
-            }
-       
-
-/*
     } catch (error) {
-        console.error('Error al comunicar con OpenAI:', error);
+        console.error("Error al conectarse a la API de OpenAI:", error.message);
         return res.status(500).send({ error: 'Error al obtener respuesta de OpenAI' });
-    
-         }
-
-         */
-
+    }
 });
 
 app.get('/', function(req, res) {
